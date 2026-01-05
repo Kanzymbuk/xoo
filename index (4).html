@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>XO Arena Deluxe</title>
+<style>
+html,body{margin:0;padding:0;height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+display:flex;justify-content:center;align-items:center;flex-direction:column;overflow:hidden;transition:background 1s ease,color 1s ease}
+.container{display:flex;flex-direction:column;align-items:center;gap:1rem;text-align:center;width:100%;max-width:420px;padding:1rem}
+.glass{backdrop-filter:blur(12px) saturate(180%);border:1px solid rgba(255,255,255,.25);border-radius:16px;box-shadow:0 4px 30px rgba(0,0,0,.3);padding:1rem;width:100%;transition:background .8s ease,box-shadow .8s ease}
+.title{font-size:1.8rem;font-weight:700;position:relative;overflow:hidden}
+.board{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem;width:100%;max-width:360px}
+.cell{aspect-ratio:1;display:flex;justify-content:center;align-items:center;font-size:2.5rem;font-weight:700;border-radius:12px;
+cursor:pointer;transition:all .3s;background:rgba(255,255,255,.1)}
+.cell:hover{background:rgba(255,255,255,.2)}
+.cell.x{color:#ff4ff6;text-shadow:0 0 12px #ff4ff6}
+.cell.o{color:#00faff;text-shadow:0 0 12px #00faff}
+.panel{display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;margin-top:.5rem;gap:.5rem}
+.button{padding:.4rem .8rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;transition:.3s}
+.button:hover{opacity:.8}
+#win-line{position:absolute;width:0;height:4px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.8),rgba(255,255,255,.1));
+border-radius:2px;box-shadow:0 0 12px rgba(255,255,255,.8);transform-origin:left center;opacity:0;transition:opacity .3s ease}
+.theme-switcher{position:fixed;top:10px;right:10px;display:flex;gap:.5rem;z-index:10}
+.theme-btn{width:25px;height:25px;border-radius:50%;border:none;cursor:pointer;box-shadow:0 0 10px rgba(0,0,0,.4);transition:transform .3s}
+.theme-btn:hover{transform:scale(1.2)}
+/* Themes */
+body.purple{background:linear-gradient(270deg,#210034,#4a0089,#6a00b8);background-size:600% 600%;animation:bgShift 20s ease infinite;color:#fff}
+body.purple .glass{background-color:rgba(255,255,255,.1);}
+body.dark{background:linear-gradient(180deg,#000,#222);color:#eee}
+body.dark .glass{background-color:rgba(255,255,255,.05);}
+body.light{background:linear-gradient(180deg,#fff,#ccc);color:#111}
+body.light .glass{background-color:rgba(255,255,255,.3);}
+@keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@media(max-width:480px){.title{font-size:1.4rem}.cell{font-size:2rem}}
+</style>
+</head>
+<body class='purple'>
+<div class='theme-switcher'>
+<button class='theme-btn' id='purpleMode' style='background:linear-gradient(90deg,#5A00A0,#8B5CF6);'></button>
+<button class='theme-btn' id='darkMode' style='background:#000;'></button>
+<button class='theme-btn' id='lightMode' style='background:#fff;'></button>
+</div>
+<div class='container'>
+<div class='glass title'>🎮 XO Arena Deluxe</div>
+<div class='glass panel'>
+<button class='button' id='modeBtn'>Mode: Single</button>
+<button class='button' id='levelBtn'>AI: Easy</button>
+<button class='button' id='tourneyBtn'>Tournament: Off</button>
+</div>
+<div class='glass board' id='board'><div id='win-line'></div></div>
+<div class='glass panel'><div id='score'>X:0 O:0</div><button class='button' id='resetBtn'>Reset Scores</button></div>
+<div id='message'></div>
+</div>
+<script>
+const boardEl=document.getElementById('board'),msg=document.getElementById('message'),scoreEl=document.getElementById('score'),winLine=document.getElementById('win-line');
+let cells=[],board,player='x',mode='single',aiLevel='easy',tourney=false,round=0,scores=JSON.parse(localStorage.getItem('xoScores')||'{"x":0,"o":0}');
+function init(){board=['','','','','','','','',''];boardEl.innerHTML='<div id="win-line"></div>';boardEl.appendChild(winLine);
+for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';c.addEventListener('click',()=>move(i));boardEl.appendChild(c)};
+cells=[...document.querySelectorAll('.cell')];updateScore();msg.textContent='Tap to play!';}
+function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
+function saveScore(){localStorage.setItem('xoScores',JSON.stringify(scores))}
+function move(i){if(board[i]||checkWinner(board))return;board[i]=player;cells[i].classList.add(player);cells[i].textContent=player.toUpperCase();
+const win=checkWinner(board);if(win)return endGame(win);if(mode==='single'&&player==='x')return setTimeout(aiMove,400);player=player==='x'?'o':'x'}
+function aiMove(){let moveIndex;if(aiLevel==='easy'){const empties=board.map((v,i)=>v?null:i).filter(v=>v!=null);moveIndex=empties[Math.floor(Math.random()*empties.length)]}
+else if(aiLevel==='medium'){moveIndex=findWin('o')??findWin('x')??randomEmpty()}else moveIndex=minimax(board,'o').index;
+board[moveIndex]='o';cells[moveIndex].classList.add('o');cells[moveIndex].textContent='O';const win=checkWinner(board);if(win)return endGame(win);player='x'}
+function findWin(sym){for(let i of wins){const[a,b,c]=i;if(board[a]===sym&&board[b]===sym&&!board[c])return c;if(board[a]===sym&&board[c]===sym&&!board[b])return b;if(board[b]===sym&&board[c]===sym&&!board[a])return a}return null}
+function randomEmpty(){return board.map((v,i)=>v?null:i).filter(v=>v!=null)[0]}
+function checkWinner(b){for(let i of wins){const[a,b1,c]=i;if(b[a]&&b[a]===b[b1]&&b[a]===b[c])return i}return b.includes('')?null:'draw'}
+function endGame(result){if(result==='draw'){msg.textContent='Draw!';return resetAfterDelay()}
+drawWinLine(result);const winner=board[result[0]];msg.textContent=winner==='x'?'X wins!':'O wins!';scores[winner]++;saveScore();updateScore();setTimeout(resetAfterDelay,1800)}
+function drawWinLine(combo){const start=cells[combo[0]].getBoundingClientRect(),end=cells[combo[2]].getBoundingClientRect(),boardRect=boardEl.getBoundingClientRect();
+const x1=start.left+start.width/2-boardRect.left,y1=start.top+start.height/2-boardRect.top,x2=end.left+end.width/2-boardRect.left,y2=end.top+end.height/2-boardRect.top;
+const length=Math.sqrt((x2-x1)**2+(y2-y1)**2);const angle=Math.atan2(y2-y1,x2-x1)*(180/Math.PI);
+winLine.style.width=length+'px';winLine.style.transform=`translate(${x1}px,${y1}px) rotate(${angle}deg)`;winLine.style.opacity=1;
+setTimeout(()=>winLine.style.opacity=0,1500);combo.forEach(i=>cells[i].style.boxShadow='0 0 15px #fff');}
+function resetAfterDelay(){setTimeout(()=>{player='x';init()},1500)}
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function minimax(newBoard,playerSym){const avail=newBoard.map((v,i)=>v?null:i).filter(v=>v!=null);if(!checkWinner(newBoard)&&avail.length===0)return{score:0};
+if(checkWinner(newBoard)&&board[checkWinner(newBoard)[0]]==='x')return{score:-10};if(checkWinner(newBoard)&&board[checkWinner(newBoard)[0]]==='o')return{score:10};
+const moves=[];for(let i of avail){const move={index:i};newBoard[i]=playerSym;const res=playerSym==='o'?minimax(newBoard,'x'):minimax(newBoard,'o');
+move.score=res.score;newBoard[i]='';moves.push(move)}let best;if(playerSym==='o'){let max=-1e9;for(let m of moves)if(m.score>max){max=m.score;best=m}}
+else{let min=1e9;for(let m of moves)if(m.score<min){min=m.score;best=m}}return best}
+document.getElementById('modeBtn').onclick=()=>{mode=mode==='single'?'multi':'single';document.getElementById('modeBtn').textContent=`Mode: ${mode==='single'?'Single':'Multi'}`;init()};
+document.getElementById('levelBtn').onclick=()=>{const lv=['easy','medium','hard'];aiLevel=lv[(lv.indexOf(aiLevel)+1)%lv.length];
+document.getElementById('levelBtn').textContent=`AI: ${aiLevel[0].toUpperCase()+aiLevel.slice(1)}`;init()};
+document.getElementById('tourneyBtn').onclick=()=>{tourney=!tourney;document.getElementById('tourneyBtn').textContent=`Tournament: ${tourney?'On':'Off'}`;init()};
+document.getElementById('resetBtn').onclick=()=>{scores={x:0,o:0};saveScore();updateScore();msg.textContent='Scores reset!'};
+document.getElementById('purpleMode').onclick=()=>{setTheme('purple')};document.getElementById('darkMode').onclick=()=>{setTheme('dark')};document.getElementById('lightMode').onclick=()=>{setTheme('light')};
+function setTheme(t){document.body.className=t;localStorage.setItem('xoTheme',t);}
+(function(){const saved=localStorage.getItem('xoTheme')||'purple';setTheme(saved);})();init();
+</script>
+</body></html>
