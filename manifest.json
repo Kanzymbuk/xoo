@@ -2,7 +2,7 @@
   "name": "XO Arena",
   "short_name": "XO Arena",
   "description": "Offline Tic Tac Toe game",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
