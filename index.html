@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6a00b8">
 <meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
 <title>XO Arena Deluxe</title>
@@ -90,5 +92,12 @@ document.getElementById('resetBtn').onclick=()=>{scores={x:0,o:0};saveScore();up
 document.getElementById('purpleMode').onclick=()=>{setTheme('purple')};document.getElementById('darkMode').onclick=()=>{setTheme('dark')};document.getElementById('lightMode').onclick=()=>{setTheme('light')};
 function setTheme(t){document.body.className=t;localStorage.setItem('xoTheme',t);}
 (function(){const saved=localStorage.getItem('xoTheme')||'purple';setTheme(saved);})();init();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}
 </script>
 </body></html>
