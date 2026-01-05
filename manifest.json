@@ -1,0 +1,11 @@
+{
+  "name": "XO Arena",
+  "short_name": "XO Arena",
+  "description": "Offline Tic Tac Toe game",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#210034",
+  "theme_color": "#6a00b8"
+}
