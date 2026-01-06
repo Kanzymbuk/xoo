@@ -62,7 +62,24 @@ for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';c.
 cells=[...document.querySelectorAll('.cell')];updateScore();msg.textContent='Tap to play!';}
 function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
 function saveScore(){localStorage.setItem('xoScores',JSON.stringify(scores))}
-function move(i){if(board[i]||checkWinner(board))return;board[i]=player;cells[i].classList.add(player);cells[i].textContent=player.toUpperCase();
+function move(i) {
+  if (board[i] || checkWinner(board)) return;
+
+  board[i] = player;
+  cells[i].classList.add(player);
+  cells[i].textContent = player.toUpperCase();
+
+  const win = checkWinner(board);
+  if (win) return endGame(win);
+
+  // switch player FIRST
+  player = player === 'x' ? 'o' : 'x';
+
+  // then trigger AI
+  if (mode === 'single' && player === 'o') {
+    setTimeout(aiMove, 400);
+  }
+}
 const win=checkWinner(board);if(win)return endGame(win);if(mode==='single'&&player==='x')return setTimeout(aiMove,400);player=player==='x'?'o':'x'}
 function aiMove(){let moveIndex;if(aiLevel==='easy'){const empties=board.map((v,i)=>v?null:i).filter(v=>v!=null);moveIndex=empties[Math.floor(Math.random()*empties.length)]}
 else if(aiLevel==='medium'){moveIndex=findWin('o')??findWin('x')??randomEmpty()}else {
