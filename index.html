@@ -18,7 +18,16 @@ html,body{
 .container{max-width:420px;width:100%;padding:1rem;display:flex;flex-direction:column;gap:1rem;text-align:center}
 .glass{backdrop-filter:blur(12px) saturate(180%);background:rgba(255,255,255,.12);border-radius:16px;padding:1rem;box-shadow:0 4px 30px rgba(0,0,0,.3)}
 .title{font-size:1.8rem;font-weight:700}
-.panel{display:flex;justify-content:space-around;gap:.5rem;flex-wrap:wrap}
+.panel{
+  display:flex;
+  justify-content:space-between;
+  gap:.5rem;
+  flex-wrap:nowrap;
+}
+.panel .button{
+  flex:1;
+  text-align:center;
+}
 .button{padding:.4rem .8rem;border-radius:8px;border:none;font-weight:600;cursor:pointer}
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;position:relative}
 .cell{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,.12)}
@@ -145,14 +154,41 @@ function checkWinner(b){
 
 /* ---------- END GAME ---------- */
 function endGame(res){
-  if(res==='draw'){msg.textContent='Draw!';return reset();}
+  if(res==='draw'){
+    msg.textContent='Draw!';
+    return reset();
+  }
+
   res.forEach(i=>cells[i].classList.add('win'));
+  drawWinLine(res); 
+
   scores[board[res[0]]]++;
   saveScore();
   updateScore();
   reset();
 }
-function reset(){setTimeout(()=>{player='x';init();},1200)}
+
+function drawWinLine(combo) {
+  const rectA = cells[combo[0]].getBoundingClientRect();
+  const rectC = cells[combo[2]].getBoundingClientRect();
+  const boardRect = boardEl.getBoundingClientRect();
+
+  const x1 = rectA.left + rectA.width / 2 - boardRect.left;
+  const y1 = rectA.top + rectA.height / 2 - boardRect.top;
+  const x2 = rectC.left + rectC.width / 2 - boardRect.left;
+  const y2 = rectC.top + rectC.height / 2 - boardRect.top;
+
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+  winLine.style.width = `${length}px`;
+  winLine.style.transform = `translate(${x1}px, ${y1}px) rotate(${angle}deg)`;
+  winLine.style.opacity = '1';
+
+  setTimeout(() => {
+    winLine.style.opacity = '0';
+  }, 1200);
+}
 
 /* ---------- SCORE ---------- */
 function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
