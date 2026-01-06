@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>XO Arena Deluxe</title>
 
 <link rel="manifest" href="manifest.json">
@@ -15,46 +15,66 @@ html,body{
   display:flex;justify-content:center;align-items:center;
   background:#210034;color:#fff;overflow:hidden;
 }
-.container{max-width:420px;width:100%;padding:1rem;display:flex;flex-direction:column;gap:1rem;text-align:center}
-.glass{backdrop-filter:blur(12px) saturate(180%);background:rgba(255,255,255,.12);border-radius:16px;padding:1rem;box-shadow:0 4px 30px rgba(0,0,0,.3)}
-.title{font-size:1.8rem;font-weight:700}
-.panel{
-  display:flex;
-  justify-content:space-between;
-  gap:.5rem;
-  flex-wrap:nowrap;
+
+.container{width:100%;max-width:420px;padding:1rem;display:flex;flex-direction:column;gap:1rem}
+.glass{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border-radius:16px;padding:1rem;box-shadow:0 6px 30px rgba(0,0,0,.35)}
+.title{text-align:center;font-size:1.9rem;font-weight:700}
+
+.controls{display:flex;gap:.5rem}
+.controls button{flex:1}
+
+.board-wrap{position:relative}
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.6rem;
 }
-.panel .button{
-  flex:1;
-  text-align:center;
+
+.cell{
+  aspect-ratio:1;
+  border-radius:14px;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.6rem;font-weight:800;
+  cursor:pointer;
+  transition:.25s;
 }
-.button{padding:.4rem .8rem;border-radius:8px;border:none;font-weight:600;cursor:pointer}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;position:relative}
-.cell{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,.12)}
-.cell.x{color:#ff4ff6;text-shadow:0 0 12px #ff4ff6}
-.cell.o{color:#00faff;text-shadow:0 0 12px #00faff}
-.cell.win{box-shadow:0 0 15px 4px rgba(255,255,255,.8)}
-#win-line {
-  position: absolute;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.2),
-    rgba(255,255,255,1),
-    rgba(255,255,255,0.2)
-  );
-  border-radius: 4px;
-  box-shadow: 0 0 18px rgba(255,255,255,0.9);
-  transform-origin: left center;
-  width: 0;
-  opacity: 0;
-  transition:
-    width 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.4s ease;
-  pointer-events: none;
+
+.cell.x{color:#ff5cf4;text-shadow:0 0 14px #ff5cf4}
+.cell.o{color:#00f5ff;text-shadow:0 0 14px #00f5ff}
+.cell.win{box-shadow:0 0 18px rgba(255,255,255,.9)}
+
+#win-line{
+  position:absolute;
+  height:5px;
+  background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,1),rgba(255,255,255,.2));
+  border-radius:6px;
+  box-shadow:0 0 20px rgba(255,255,255,.9);
+  width:0;
+  opacity:0;
+  transform-origin:left center;
+  transition:width .6s ease, opacity .3s ease;
+  pointer-events:none;
 }
-.theme-switcher{position:fixed;top:10px;right:10px;display:flex;gap:.5rem}
-.theme-btn{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer}
+
+button{
+  border:none;border-radius:10px;
+  padding:.45rem;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.footer{display:flex;justify-content:space-between;align-items:center}
+.message{text-align:center;font-size:1rem}
+
+.theme-switch{
+  position:fixed;top:12px;right:12px;
+  display:flex;gap:.5rem;
+}
+.theme-switch button{
+  width:26px;height:26px;border-radius:50%;
+}
+
 body.purple{background:linear-gradient(270deg,#210034,#4a0089,#6a00b8)}
 body.dark{background:linear-gradient(180deg,#000,#222)}
 body.light{background:linear-gradient(180deg,#fff,#ccc);color:#111}
@@ -63,70 +83,73 @@ body.light{background:linear-gradient(180deg,#fff,#ccc);color:#111}
 
 <body class="purple">
 
-<div class="theme-switcher">
-  <button class="theme-btn" style="background:#8B5CF6" onclick="setTheme('purple')"></button>
-  <button class="theme-btn" style="background:#000" onclick="setTheme('dark')"></button>
-  <button class="theme-btn" style="background:#fff" onclick="setTheme('light')"></button>
+<div class="theme-switch">
+  <button style="background:#8b5cf6" onclick="setTheme('purple')"></button>
+  <button style="background:#000" onclick="setTheme('dark')"></button>
+  <button style="background:#fff" onclick="setTheme('light')"></button>
 </div>
 
 <div class="container">
   <div class="glass title">🎮 XO Arena Deluxe</div>
 
-  <div class="glass panel">
-    <button class="button" id="modeBtn">Mode: Single</button>
-    <button class="button" id="levelBtn">AI: Easy</button>
-    <button class="button" id="tourneyBtn">Tournament: Off</button>
+  <div class="glass controls">
+    <button id="modeBtn">Mode: Single</button>
+    <button id="levelBtn">AI: Easy</button>
+    <button id="tourBtn">Tournament: Off</button>
   </div>
 
-  <div class="glass board" id="board">
+  <div class="glass board-wrap">
+    <div class="board" id="board"></div>
     <div id="win-line"></div>
   </div>
 
-  <div class="glass panel">
+  <div class="glass footer">
     <div id="score">X:0 O:0</div>
-    <button class="button" id="resetBtn">Reset Scores</button>
+    <button onclick="resetScores()">Reset Scores</button>
   </div>
 
-  <div id="message">Tap to play!</div>
+  <div class="message" id="msg">Tap to play!</div>
 </div>
 
 <script>
-/* ---------- STATE ---------- */
-let board=[],cells=[],player='x',mode='single',ai='easy',tourney=false;
+/* ========= STATE ========= */
+let board, cells, player='x';
+let mode='single', ai='easy', tournament=false;
 let scores=JSON.parse(localStorage.getItem('xoScores')||'{"x":0,"o":0}');
 const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-/* ---------- INIT ---------- */
 const boardEl=document.getElementById('board');
 const winLine=document.getElementById('win-line');
-const msg=document.getElementById('message');
+const msg=document.getElementById('msg');
 const scoreEl=document.getElementById('score');
 
+/* ========= INIT ========= */
 function init(){
   board=Array(9).fill('');
-  boardEl.innerHTML='<div id="win-line"></div>';
-  boardEl.appendChild(winLine);
+  boardEl.innerHTML='';
+  winLine.style.opacity=0;
+  winLine.style.width='0';
+
   for(let i=0;i<9;i++){
     const c=document.createElement('div');
     c.className='cell';
-    c.onclick=()=>handleMove(i);
+    c.onclick=()=>play(i);
     boardEl.appendChild(c);
   }
   cells=[...document.querySelectorAll('.cell')];
   updateScore();
 }
+init();
 
-/* ---------- GAME FLOW ---------- */
-function handleMove(i){
-  if(board[i]||checkWinner(board))return;
-  place(i,player);
-  let w=checkWinner(board);
-  if(w)return endGame(w);
+/* ========= GAME ========= */
+function play(i){
+  if(board[i]||check())return;
+  place(i,'x');
+  let w=check();
+  if(w)return end(w);
+
   if(mode==='single'){
-    player='o';
     setTimeout(aiMove,250);
-  }else{
-    player=player==='x'?'o':'x';
   }
 }
 
@@ -136,26 +159,25 @@ function place(i,p){
   cells[i].textContent=p.toUpperCase();
 }
 
-/* ---------- AI ---------- */
 function aiMove(){
-  if(checkWinner(board))return;
+  if(check())return;
   let i;
-  if(ai==='easy') i=randomEmpty();
-  else if(ai==='medium') i=findWin('o')??findWin('x')??randomEmpty();
-  else i=minimax(board,'o').index ?? randomEmpty();
+  if(ai==='easy') i=random();
+  else if(ai==='medium') i=winFor('o')??winFor('x')??random();
+  else i=minimax(board,'o').index ?? random();
+
   if(i==null)return;
   place(i,'o');
-  let w=checkWinner(board);
-  if(w)return endGame(w);
-  player='x';
+  let w=check();
+  if(w)return end(w);
 }
 
-/* ---------- HELPERS ---------- */
-function randomEmpty(){
+function random(){
   const e=board.map((v,i)=>v===''?i:null).filter(i=>i!=null);
   return e.length?e[Math.floor(Math.random()*e.length)]:null;
 }
-function findWin(sym){
+
+function winFor(sym){
   for(let [a,b,c] of wins){
     if(board[a]===sym&&board[b]===sym&&board[c]==='')return c;
     if(board[a]===sym&&board[c]===sym&&board[b]==='')return b;
@@ -163,91 +185,102 @@ function findWin(sym){
   }
   return null;
 }
-function checkWinner(b){
-  for(let [a,b1,c] of wins){
-    if(b[a]&&b[a]===b[b1]&&b[a]===b[c])return[a,b1,c];
+
+function check(){
+  for(let w of wins){
+    if(board[w[0]]&&board[w[0]]===board[w[1]]&&board[w[0]]===board[w[2]])return w;
   }
-  return b.includes('')?null:'draw';
+  return board.includes('')?null:'draw';
 }
 
-/* ---------- END GAME ---------- */
-function endGame(result) {
-  if (result === 'draw') {
-    msg.textContent = 'Draw!';
-    return setTimeout(reset, 1200);
+/* ========= END ========= */
+function end(res){
+  if(res==='draw'){
+    msg.textContent='Draw!';
+    return setTimeout(init,1200);
   }
 
-  result.forEach(i => cells[i].classList.add('win'));
-  drawWinLine(result);
+  res.forEach(i=>cells[i].classList.add('win'));
+  drawLine(res);
 
-  const winner = board[result[0]];
-  msg.textContent = winner.toUpperCase() + ' wins!';
-  scores[winner]++;
-  saveScore();
+  scores[board[res[0]]]++;
+  localStorage.setItem('xoScores',JSON.stringify(scores));
   updateScore();
+  msg.textContent=board[res[0]].toUpperCase()+' wins';
 
-  setTimeout(() => {
-    winLine.style.opacity = '0';
-    reset();
-  }, 1500);
+  setTimeout(init,1500);
 }
 
-  // Reset line
-  winLine.style.transition = 'none';
-  winLine.style.width = '0';
-  winLine.style.opacity = '0';
+/* ========= WIN LINE ========= */
+function drawLine([a,_,c]){
+  const r1=cells[a].getBoundingClientRect();
+  const r2=cells[c].getBoundingClientRect();
+  const br=boardEl.getBoundingClientRect();
 
-  // Position line at start
-  winLine.style.transform =
-    `translate(${x1}px, ${y1}px) rotate(${angle}deg)`;
+  const x1=r1.left-br.left+r1.width/2;
+  const y1=r1.top-br.top+r1.height/2;
+  const x2=r2.left-br.left+r2.width/2;
+  const y2=r2.top-br.top+r2.height/2;
 
-  // Force layout so transition works
-  winLine.getBoundingClientRect();
+  const len=Math.hypot(x2-x1,y2-y1);
+  const ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
 
-  // Animate
-  winLine.style.transition =
-    'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
-  winLine.style.width = `${length}px`;
-  winLine.style.opacity = '1';
+  winLine.style.transform=`translate(${x1}px,${y1}px) rotate(${ang}deg)`;
+  winLine.style.width='0';
+  winLine.style.opacity=1;
+  requestAnimationFrame(()=>winLine.style.width=len+'px');
 }
 
-/* ---------- SCORE ---------- */
-function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
-function saveScore(){localStorage.setItem('xoScores',JSON.stringify(scores))}
-
-/* ---------- MINIMAX ---------- */
+/* ========= MINIMAX ========= */
 function minimax(b,p){
-  let w=checkWinner(b);
+  let w=check();
   if(w==='draw')return{score:0};
   if(w&&b[w[0]]==='x')return{score:-10};
   if(w&&b[w[0]]==='o')return{score:10};
-  let m=[];
+
+  let moves=[];
   b.forEach((v,i)=>{
     if(v===''){
       b[i]=p;
       let s=minimax(b,p==='o'?'x':'o').score;
-      m.push({index:i,score:s});
+      moves.push({index:i,score:s});
       b[i]='';
     }
   });
-  return p==='o'?m.reduce((a,b)=>b.score>a.score?b:a):m.reduce((a,b)=>b.score<a.score?b:a);
+  return p==='o'
+    ?moves.reduce((a,b)=>b.score>a.score?b:a)
+    :moves.reduce((a,b)=>b.score<a.score?b:a);
 }
 
-/* ---------- UI ---------- */
-document.getElementById('modeBtn').onclick=()=>{mode=mode==='single'?'multi':'single';init();}
-document.getElementById('levelBtn').onclick=()=>{ai=['easy','medium','hard'][( ['easy','medium','hard'].indexOf(ai)+1)%3];document.getElementById('levelBtn').textContent=`AI: ${ai.charAt(0).toUpperCase()+ai.slice(1)}`;init();}
-document.getElementById('tourneyBtn').onclick=()=>{tourney=!tourney;init();}
-document.getElementById('resetBtn').onclick=()=>{scores={x:0,o:0};saveScore();updateScore();}
+/* ========= UI ========= */
+function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
+function resetScores(){scores={x:0,o:0};localStorage.setItem('xoScores',JSON.stringify(scores));updateScore();}
+
+document.getElementById('modeBtn').onclick=()=>{
+  mode=mode==='single'?'multi':'single';
+  document.getElementById('modeBtn').textContent=`Mode: ${mode==='single'?'Single':'Multi'}`;
+  init();
+};
+
+document.getElementById('levelBtn').onclick=()=>{
+  ai=['easy','medium','hard'][( ['easy','medium','hard'].indexOf(ai)+1)%3];
+  document.getElementById('levelBtn').textContent=`AI: ${ai.charAt(0).toUpperCase()+ai.slice(1)}`;
+  init();
+};
+
+document.getElementById('tourBtn').onclick=()=>{
+  tournament=!tournament;
+  document.getElementById('tourBtn').textContent=`Tournament: ${tournament?'On':'Off'}`;
+  init();
+};
 
 function setTheme(t){document.body.className=t;localStorage.setItem('xoTheme',t)}
 setTheme(localStorage.getItem('xoTheme')||'purple');
-
-init();
 </script>
 
 <script>
-if("serviceWorker"in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
+if('serviceWorker'in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
 }
 </script>
 
