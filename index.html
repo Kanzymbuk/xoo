@@ -55,83 +55,162 @@ body.light .glass{background-color:rgba(255,255,255,.3);}
 <div id='message'></div>
 </div>
 <script>
-const boardEl=document.getElementById('board'),msg=document.getElementById('message'),scoreEl=document.getElementById('score'),winLine=document.getElementById('win-line');
-let cells=[],board,player='x',mode='single',aiLevel='easy',tourney=false,round=0,scores=JSON.parse(localStorage.getItem('xoScores')||'{"x":0,"o":0}');
-function init(){board=['','','','','','','','',''];boardEl.innerHTML='<div id="win-line"></div>';boardEl.appendChild(winLine);
-for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';c.addEventListener('click',()=>move(i));boardEl.appendChild(c)};
-cells=[...document.querySelectorAll('.cell')];updateScore();msg.textContent='Tap to play!';}
-function updateScore(){scoreEl.textContent=`X:${scores.x} O:${scores.o}`}
-function saveScore(){localStorage.setItem('xoScores',JSON.stringify(scores))}
-function move(i) {
+const boardEl = document.getElementById('board');
+const msg = document.getElementById('message');
+const scoreEl = document.getElementById('score');
+const winLine = document.getElementById('win-line');
+
+let cells = [];
+let board = [];
+let player = 'x';
+let mode = 'single';
+let aiLevel = 'easy';
+let tourney = false;
+let scores = JSON.parse(localStorage.getItem('xoScores') || '{"x":0,"o":0}');
+
+const wins = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function init() {
+  board = Array(9).fill('');
+  boardEl.innerHTML = '<div id="win-line"></div>';
+  boardEl.appendChild(winLine);
+
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.addEventListener('click', () => handleMove(i));
+    boardEl.appendChild(c);
+  }
+
+  cells = [...document.querySelectorAll('.cell')];
+  updateScore();
+  msg.textContent = 'Tap to play!';
+}
+
+function handleMove(i) {
   if (board[i] || checkWinner(board)) return;
 
   board[i] = player;
-  cells[i].classList.add(player);
-  cells[i].textContent = player.toUpperCase();
+  renderCell(i);
 
   const win = checkWinner(board);
   if (win) return endGame(win);
 
-  // switch player FIRST
-  player = player === 'x' ? 'o' : 'x';
-
-  // then trigger AI
-  if (mode === 'single' && player === 'o') {
-    setTimeout(aiMove, 400);
-  }
-}
-const win=checkWinner(board);if(win)return endGame(win);if(mode==='single'&&player==='x')return setTimeout(aiMove,400);player=player==='x'?'o':'x'}
-function aiMove(){let moveIndex;if(aiLevel==='easy'){const empties=board.map((v,i)=>v?null:i).filter(v=>v!=null);moveIndex=empties[Math.floor(Math.random()*empties.length)]}
-else if(aiLevel==='medium'){moveIndex=findWin('o')??findWin('x')??randomEmpty()}else {
-  const bestMove = minimax(board, 'o');
-  moveIndex = bestMove?.index;
-  // SAFETY FALLBACK (prevents freeze)
-  if (moveIndex === undefined) {
-  const empties = board
-    .map((v, i) => v === '' ? i : null)
-    .filter(i => i !== null);
-
-  if (empties.length > 0) {
-    moveIndex = empties[Math.floor(Math.random() * empties.length)];
+  if (mode === 'single') {
+    player = 'o';
+    setTimeout(aiMove, 300);
   } else {
-    return; // board full — nothing to do
+    player = player === 'x' ? 'o' : 'x';
   }
-  } 
-board[moveIndex]='o';cells[moveIndex].classList.add('o');cells[moveIndex].textContent='O';const win=checkWinner(board);if(win)return endGame(win);player='x'}
-function findWin(sym){for(let i of wins){const[a,b,c]=i;if(board[a]===sym&&board[b]===sym&&!board[c])return c;if(board[a]===sym&&board[c]===sym&&!board[b])return b;if(board[b]===sym&&board[c]===sym&&!board[a])return a}return null}
-function randomEmpty(){return board.map((v,i)=>v?null:i).filter(v=>v!=null)[0]}
-function checkWinner(b){for(let i of wins){const[a,b1,c]=i;if(b[a]&&b[a]===b[b1]&&b[a]===b[c])return i}return b.includes('')?null:'draw'}
-function endGame(result){if(result==='draw'){msg.textContent='Draw!';return resetAfterDelay()}
-drawWinLine(result);const winner=board[result[0]];msg.textContent=winner==='x'?'X wins!':'O wins!';scores[winner]++;saveScore();updateScore();setTimeout(resetAfterDelay,1800)}
-function drawWinLine(combo){const start=cells[combo[0]].getBoundingClientRect(),end=cells[combo[2]].getBoundingClientRect(),boardRect=boardEl.getBoundingClientRect();
-const x1=start.left+start.width/2-boardRect.left,y1=start.top+start.height/2-boardRect.top,x2=end.left+end.width/2-boardRect.left,y2=end.top+end.height/2-boardRect.top;
-const length=Math.sqrt((x2-x1)**2+(y2-y1)**2);const angle=Math.atan2(y2-y1,x2-x1)*(180/Math.PI);
-winLine.style.width=length+'px';winLine.style.transform=`translate(${x1}px,${y1}px) rotate(${angle}deg)`;winLine.style.opacity=1;
-setTimeout(()=>winLine.style.opacity=0,1500);combo.forEach(i=>cells[i].style.boxShadow='0 0 15px #fff');}
-function resetAfterDelay(){setTimeout(()=>{player='x';init()},1500)}
-const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-function minimax(newBoard,playerSym){const avail=newBoard.map((v,i)=>v?null:i).filter(v=>v!=null);if(!checkWinner(newBoard)&&avail.length===0)return{score:0};
-const win = checkWinner(newBoard);
-if (win === 'draw') return { score: 0 };
-if (win === 'x') return { score: -10 };
-if (win === 'o') return { score: 10 };
-const moves=[];for(let i of avail){const move={index:i};newBoard[i]=playerSym;const res=playerSym==='o'?minimax(newBoard,'x'):minimax(newBoard,'o');
-move.score=res.score;newBoard[i]='';moves.push(move)}let best;if(playerSym==='o'){let max=-1e9;for(let m of moves)if(m.score>max){max=m.score;best=m}}
-else{let min=1e9;for(let m of moves)if(m.score<min){min=m.score;best=m}}return best}
-document.getElementById('modeBtn').onclick=()=>{mode=mode==='single'?'multi':'single';document.getElementById('modeBtn').textContent=`Mode: ${mode==='single'?'Single':'Multi'}`;init()};
-document.getElementById('levelBtn').onclick=()=>{const lv=['easy','medium','hard'];aiLevel=lv[(lv.indexOf(aiLevel)+1)%lv.length];
-document.getElementById('levelBtn').textContent=`AI: ${aiLevel[0].toUpperCase()+aiLevel.slice(1)}`;init()};
-document.getElementById('tourneyBtn').onclick=()=>{tourney=!tourney;document.getElementById('tourneyBtn').textContent=`Tournament: ${tourney?'On':'Off'}`;init()};
-document.getElementById('resetBtn').onclick=()=>{scores={x:0,o:0};saveScore();updateScore();msg.textContent='Scores reset!'};
-document.getElementById('purpleMode').onclick=()=>{setTheme('purple')};document.getElementById('darkMode').onclick=()=>{setTheme('dark')};document.getElementById('lightMode').onclick=()=>{setTheme('light')};
-function setTheme(t){document.body.className=t;localStorage.setItem('xoTheme',t);}
-(function(){const saved=localStorage.getItem('xoTheme')||'purple';setTheme(saved);})();init();
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js");
-  });
 }
+
+function renderCell(i) {
+  cells[i].classList.add(player);
+  cells[i].textContent = player.toUpperCase();
+}
+
+function aiMove() {
+  if (checkWinner(board)) return;
+
+  let moveIndex;
+
+  if (aiLevel === 'easy') {
+    moveIndex = randomEmpty();
+  } else if (aiLevel === 'medium') {
+    moveIndex = findWin('o') ?? findWin('x') ?? randomEmpty();
+  } else {
+    const best = minimax(board, 'o');
+    moveIndex = best?.index ?? randomEmpty();
+  }
+
+  if (moveIndex == null) return;
+
+  board[moveIndex] = 'o';
+  renderCell(moveIndex);
+
+  const win = checkWinner(board);
+  if (win) return endGame(win);
+
+  player = 'x';
+}
+
+function randomEmpty() {
+  const empties = board.map((v,i)=>v===''?i:null).filter(i=>i!==null);
+  return empties.length ? empties[Math.floor(Math.random()*empties.length)] : null;
+}
+
+function findWin(sym) {
+  for (let [a,b,c] of wins) {
+    if (board[a]===sym && board[b]===sym && board[c]==='') return c;
+    if (board[a]===sym && board[c]===sym && board[b]==='') return b;
+    if (board[b]===sym && board[c]===sym && board[a]==='') return a;
+  }
+  return null;
+}
+
+function checkWinner(b) {
+  for (let [a,b1,c] of wins) {
+    if (b[a] && b[a]===b[b1] && b[a]===b[c]) return [a,b1,c];
+  }
+  return b.includes('') ? null : 'draw';
+}
+
+function endGame(result) {
+  if (result === 'draw') {
+    msg.textContent = 'Draw!';
+    return resetAfterDelay();
+  }
+
+  const winner = board[result[0]];
+  msg.textContent = winner.toUpperCase() + ' wins!';
+  scores[winner]++;
+  saveScore();
+  updateScore();
+  resetAfterDelay();
+}
+
+function resetAfterDelay() {
+  setTimeout(() => {
+    player = 'x';
+    init();
+  }, 1500);
+}
+
+function updateScore() {
+  scoreEl.textContent = `X:${scores.x} O:${scores.o}`;
+}
+
+function saveScore() {
+  localStorage.setItem('xoScores', JSON.stringify(scores));
+}
+
+function minimax(newBoard, sym) {
+  const win = checkWinner(newBoard);
+  if (win === 'draw') return { score: 0 };
+  if (win && newBoard[win[0]] === 'x') return { score: -10 };
+  if (win && newBoard[win[0]] === 'o') return { score: 10 };
+
+  const moves = [];
+
+  newBoard.forEach((v,i) => {
+    if (v === '') {
+      newBoard[i] = sym;
+      const score = minimax(newBoard, sym==='o'?'x':'o').score;
+      moves.push({ index:i, score });
+      newBoard[i] = '';
+    }
+  });
+
+  return sym === 'o'
+    ? moves.reduce((a,b)=>b.score>a.score?b:a)
+    : moves.reduce((a,b)=>b.score<a.score?b:a);
+}
+
+init();
+
 </script>
 </body></html>
