@@ -34,7 +34,25 @@ html,body{
 .cell.x{color:#ff4ff6;text-shadow:0 0 12px #ff4ff6}
 .cell.o{color:#00faff;text-shadow:0 0 12px #00faff}
 .cell.win{box-shadow:0 0 15px 4px rgba(255,255,255,.8)}
-#win-line{position:absolute;height:4px;background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9),rgba(255,255,255,.2));opacity:0;transition:.3s}
+#win-line {
+  position: absolute;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.2),
+    rgba(255,255,255,1),
+    rgba(255,255,255,0.2)
+  );
+  border-radius: 4px;
+  box-shadow: 0 0 18px rgba(255,255,255,0.9);
+  transform-origin: left center;
+  width: 0;
+  opacity: 0;
+  transition:
+    width 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
+  pointer-events: none;
+}
 .theme-switcher{position:fixed;top:10px;right:10px;display:flex;gap:.5rem}
 .theme-btn{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer}
 body.purple{background:linear-gradient(270deg,#210034,#4a0089,#6a00b8)}
@@ -153,41 +171,44 @@ function checkWinner(b){
 }
 
 /* ---------- END GAME ---------- */
-function endGame(res){
-  if(res==='draw'){
-    msg.textContent='Draw!';
-    return reset();
+function endGame(result) {
+  if (result === 'draw') {
+    msg.textContent = 'Draw!';
+    return setTimeout(reset, 1200);
   }
 
-  res.forEach(i=>cells[i].classList.add('win'));
-  drawWinLine(res); 
+  result.forEach(i => cells[i].classList.add('win'));
+  drawWinLine(result);
 
-  scores[board[res[0]]]++;
+  const winner = board[result[0]];
+  msg.textContent = winner.toUpperCase() + ' wins!';
+  scores[winner]++;
   saveScore();
   updateScore();
-  reset();
-}
-
-function drawWinLine(combo) {
-  const rectA = cells[combo[0]].getBoundingClientRect();
-  const rectC = cells[combo[2]].getBoundingClientRect();
-  const boardRect = boardEl.getBoundingClientRect();
-
-  const x1 = rectA.left + rectA.width / 2 - boardRect.left;
-  const y1 = rectA.top + rectA.height / 2 - boardRect.top;
-  const x2 = rectC.left + rectC.width / 2 - boardRect.left;
-  const y2 = rectC.top + rectC.height / 2 - boardRect.top;
-
-  const length = Math.hypot(x2 - x1, y2 - y1);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-
-  winLine.style.width = `${length}px`;
-  winLine.style.transform = `translate(${x1}px, ${y1}px) rotate(${angle}deg)`;
-  winLine.style.opacity = '1';
 
   setTimeout(() => {
     winLine.style.opacity = '0';
-  }, 1200);
+    reset();
+  }, 1500);
+}
+
+  // Reset line
+  winLine.style.transition = 'none';
+  winLine.style.width = '0';
+  winLine.style.opacity = '0';
+
+  // Position line at start
+  winLine.style.transform =
+    `translate(${x1}px, ${y1}px) rotate(${angle}deg)`;
+
+  // Force layout so transition works
+  winLine.getBoundingClientRect();
+
+  // Animate
+  winLine.style.transition =
+    'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
+  winLine.style.width = `${length}px`;
+  winLine.style.opacity = '1';
 }
 
 /* ---------- SCORE ---------- */
