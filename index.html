@@ -65,7 +65,21 @@ function saveScore(){localStorage.setItem('xoScores',JSON.stringify(scores))}
 function move(i){if(board[i]||checkWinner(board))return;board[i]=player;cells[i].classList.add(player);cells[i].textContent=player.toUpperCase();
 const win=checkWinner(board);if(win)return endGame(win);if(mode==='single'&&player==='x')return setTimeout(aiMove,400);player=player==='x'?'o':'x'}
 function aiMove(){let moveIndex;if(aiLevel==='easy'){const empties=board.map((v,i)=>v?null:i).filter(v=>v!=null);moveIndex=empties[Math.floor(Math.random()*empties.length)]}
-else if(aiLevel==='medium'){moveIndex=findWin('o')??findWin('x')??randomEmpty()}else moveIndex=minimax(board,'o').index;
+else if(aiLevel==='medium'){moveIndex=findWin('o')??findWin('x')??randomEmpty()}else {
+  const bestMove = minimax(board, 'o');
+  moveIndex = bestMove?.index;
+  // SAFETY FALLBACK (prevents freeze)
+  if (moveIndex === undefined) {
+  const empties = board
+    .map((v, i) => v === '' ? i : null)
+    .filter(i => i !== null);
+
+  if (empties.length > 0) {
+    moveIndex = empties[Math.floor(Math.random() * empties.length)];
+  } else {
+    return; // board full — nothing to do
+  }
+  } 
 board[moveIndex]='o';cells[moveIndex].classList.add('o');cells[moveIndex].textContent='O';const win=checkWinner(board);if(win)return endGame(win);player='x'}
 function findWin(sym){for(let i of wins){const[a,b,c]=i;if(board[a]===sym&&board[b]===sym&&!board[c])return c;if(board[a]===sym&&board[c]===sym&&!board[b])return b;if(board[b]===sym&&board[c]===sym&&!board[a])return a}return null}
 function randomEmpty(){return board.map((v,i)=>v?null:i).filter(v=>v!=null)[0]}
@@ -80,7 +94,10 @@ setTimeout(()=>winLine.style.opacity=0,1500);combo.forEach(i=>cells[i].style.box
 function resetAfterDelay(){setTimeout(()=>{player='x';init()},1500)}
 const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 function minimax(newBoard,playerSym){const avail=newBoard.map((v,i)=>v?null:i).filter(v=>v!=null);if(!checkWinner(newBoard)&&avail.length===0)return{score:0};
-if(checkWinner(newBoard)&&board[checkWinner(newBoard)[0]]==='x')return{score:-10};if(checkWinner(newBoard)&&board[checkWinner(newBoard)[0]]==='o')return{score:10};
+const win = checkWinner(newBoard);
+if (win === 'draw') return { score: 0 };
+if (win === 'x') return { score: -10 };
+if (win === 'o') return { score: 10 };
 const moves=[];for(let i of avail){const move={index:i};newBoard[i]=playerSym;const res=playerSym==='o'?minimax(newBoard,'x'):minimax(newBoard,'o');
 move.score=res.score;newBoard[i]='';moves.push(move)}let best;if(playerSym==='o'){let max=-1e9;for(let m of moves)if(m.score>max){max=m.score;best=m}}
 else{let min=1e9;for(let m of moves)if(m.score<min){min=m.score;best=m}}return best}
